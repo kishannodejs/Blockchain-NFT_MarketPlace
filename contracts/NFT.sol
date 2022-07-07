@@ -4,6 +4,10 @@ pragma solidity ^0.8.0;
 import "../node_modules/openzeppelin-contracts-master/contracts/token/ERC721/ERC721.sol";
 
 contract NFT is ERC721 {
+
+    /**
+     * @dev Emitted when NFT Owner start auction.
+     */
     event AuctionStarted(
         address indexed _owner,
         uint256 _tokenId,
@@ -81,6 +85,15 @@ contract NFT is ERC721 {
         _;
     }
 
+    /**
+     * @dev user can mint their NFT
+
+     *
+     * Requierments
+     * @param _name - User haev to pass name for their NFT
+     *
+     */
+
     function mint(string memory _name) public {
         uint32 timenow = uint32(block.timestamp);
         tokenIds++;
@@ -98,6 +111,16 @@ contract NFT is ERC721 {
         );
         _safeMint(msg.sender, tokenIds);
     }
+
+    /**
+     * @dev User can get the details of NFT
+     *
+     * Requierments
+     *
+     * @param _tokenId - User haev to pass tokenId to get details of NFT.
+     * '_tokenId' must exist.
+     *
+     */
 
     function getItemDetails(uint256 _tokenId)
         public
@@ -131,6 +154,24 @@ contract NFT is ERC721 {
         );
     }
 
+
+    /**
+     * @dev NFT Owner will start auction for their NFT.
+     *
+     * Requierments
+     *
+     * @param _tokenId - User haev to pass tokenId to start auction.
+     * @param _minBid - User haev to pass miniBid.
+     * @param _timePeriod - User haev to pass timePeriod for how much time this auction exist.
+     *
+     * '_tokenId' must exist.
+     * 'onlyNFTOwner' will start the auction.
+     *
+     * Emits an {AuctionStarted} event.
+     *
+     */
+
+
     function startAuction(
         uint256 _tokenId,
         uint256 _minBid,
@@ -149,6 +190,20 @@ contract NFT is ERC721 {
             _itemsDetails.name
         );
     }
+
+    /**
+     * @dev People can place their bid for NFT they intrested.
+     *
+     * Requierments
+     *
+     * @param _tokenId - User haev to pass tokenId to place bid for that NFt.
+     *
+     * '_tokenId' must exist.
+     * 'auctionStarted' Auction should started.
+     * 'notNFTOwner' Bider should not be Owner of NFT.
+     * 'miniBid' Biding price should be greater than minimum bid set by NFT Owner.
+     *
+     */
 
     function placeBid(uint256 _tokenId)
         public
@@ -179,6 +234,18 @@ contract NFT is ERC721 {
         return true;
     }
 
+    /**
+     * @dev People can see the auction winner as well as highest bidding amount of NFT.
+     *
+     * Requierments
+     *
+     * @param _tokenId - User haev to pass tokenId to get winner of NFT.
+     *
+     * '_tokenId' must exist.
+     * 'auctionStarted' Auction should started.
+     *
+     */
+    
     function auctionResult(uint256 _tokenId)
         public
         view
@@ -193,6 +260,19 @@ contract NFT is ERC721 {
             revert("Auction still running check after auction ends.");
         return (_bider.bidAmnt, _bider.biderAddress);
     }
+
+
+    /**
+     * @dev NFT Owner will call this function to transfer NFT to winner and get highest biding amount.
+     *
+     * Requierments
+     *
+     * @param _tokenId - Owner haev to pass tokenId to transfer the NFT to Winner.
+     *
+     * '_tokenId' must exist.
+     * 'onlyNFTowner' will call this function.
+     *
+     */
 
     function transferNFT(uint256 _tokenId)
         public
@@ -218,6 +298,18 @@ contract NFT is ERC721 {
         _bider.biderAddress = payable(0x0);
         return true;
     }
+
+    /**
+     * @dev People who bid for NFT can withdraw their amount.
+     *
+     * Requierments
+     *
+     * @param _tokenId - User haev to pass tokenId to get their amount bid for NFT.
+     *
+     * '_tokenId' must exist.
+     * 'fundByBiders' for _tokenId must be greater than zero.
+     *
+     */
 
     function withdrawal(uint256 _tokenId) public tokenExists(_tokenId) {
         if (fundByBiders[_tokenId][msg.sender] < 1) revert();
